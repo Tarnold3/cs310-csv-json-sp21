@@ -69,6 +69,46 @@ public class Converter {
             
             // INSERT YOUR CODE HERE
             
+            //Creates new JSON Object
+            JSONObject jsonObj = new JSONObject();                        
+            
+            //Creating 3 arrays: 1 for columns, 1 for rows, and 1 for data
+            JSONArray colHeaders = new JSONArray();
+            JSONArray rowHeaders = new JSONArray();
+            JSONArray data = new JSONArray();
+            JSONArray holder;
+            String [] records = iterator.next();
+            
+            //Iterates through input file
+            //String[] records = iterator.next();
+            
+            //Initiate for loop (set to continue converting as long as "i" is not out of input)
+            for(int i = 0; i < records.length; i++){
+                colHeaders.add(records[i]);
+            }
+            while(iterator.hasNext()){
+                holder = new JSONArray();
+                records = iterator.next();
+                rowHeaders.add(records[0]);
+            //  String [] rows = iterator.next();
+            //  JSONArray list = new JSONArray();
+            //  rowHeaders.add(rows[0]);
+                
+                for(int i = 1; i < (records.length); i++){
+                    int stringHolder = Integer.parseInt(records[i]);
+                    holder.add(stringHolder);
+            //  int stringHolder = Integer.parseInt(records[i]);
+            //  holder.add(stringHolder);                    
+                }
+                data.add(holder);
+            }
+            jsonObj.put("rowHeaders", rowHeaders);
+            jsonObj.put("colHeaders", colHeaders);
+            jsonObj.put("data", data);
+            
+            //Converts results to JSON
+            results = JSONValue.toJSONString(jsonObj);
+                               
         }        
         catch(Exception e) { return e.toString(); }
         
@@ -87,6 +127,35 @@ public class Converter {
             
             // INSERT YOUR CODE HERE
             
+           //Creating a new JSON Parser to read through the input file
+            JSONParser parser = new JSONParser();
+            JSONObject jsonObj = (JSONObject) parser.parse(jsonString);
+            
+            //Creating 3 arrays: 1 for columns, 1 for rows, and 1 for data
+            JSONArray colHeaders = (JSONArray) jsonObj.get("colHeaders");
+            JSONArray rowHeaders = (JSONArray) jsonObj.get("rowHeaders");
+            JSONArray data = (JSONArray) jsonObj.get("data");
+            
+            String[] heading = new String[colHeaders.size()];
+            
+            //Initiating for loops that runs until i, j, and k are out of input
+            for(int i = 0; i < colHeaders.size(); i++){
+                heading[i] = (String) colHeaders.get(i);
+            }
+            csvWriter.writeNext(heading);
+            
+            for(int j = 0; j < data.size(); j++){
+                JSONArray jsonArray = (JSONArray) data.get(j);
+                String[] rows = new String[jsonArray.size() + 1];
+                rows[0] = (String) rowHeaders.get(j);
+            for(int k = 0; k < jsonArray.size(); k++){
+                rows[k + 1] = Long.toString((long)jsonArray.get(k));
+            }
+            //Writes next rows in CSV format
+            csvWriter.writeNext(rows);
+            }
+            //Coverts results to a String
+            results = writer.toString();
         }
         
         catch(Exception e) { return e.toString(); }
